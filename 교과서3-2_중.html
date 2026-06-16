@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>변형문제 — 학생용</title>
+<style>
+  :root{ --ink:#1a1a1a; --line:#cfcfcf; --soft:#f6f6f4; --accent:#7a1f2b; --teach:#0b6b53;
+         --ok:#1c7c4a; --no:#b3261e; --rev:#a86b00; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Noto Serif KR',Georgia,'Times New Roman',serif; color:var(--ink);
+        max-width:820px; margin:0 auto; padding:28px 22px 100px; line-height:1.6; background:#fff; }
+  header.sheet{ border-bottom:2.5px solid var(--ink); padding-bottom:12px; margin-bottom:18px; }
+  .sheet h1{ font-size:1.35rem; margin:0 0 4px; }
+  .meta{ font-size:.82rem; color:#555; } .meta b{ color:var(--accent); }
+  .controls{ position:sticky; top:0; background:#fff; padding:10px 0; border-bottom:1px solid var(--line);
+             margin-bottom:18px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; z-index:5; }
+  button{ font:inherit; font-size:.85rem; padding:6px 14px; border-radius:20px; cursor:pointer; }
+  button.grade{ border:1.5px solid var(--accent); color:#fff; background:var(--accent); }
+  button.reset{ border:1.5px solid #aaa; color:#555; background:#fff; }
+  button.toggle{ border:1.5px solid var(--teach); color:var(--teach); background:#fff; }
+  button.toggle.on{ background:var(--teach); color:#fff; }
+  #score{ display:none; font-size:.92rem; font-weight:600; margin-left:auto; }
+  #score b{ color:var(--accent); }
+  .passage{ background:var(--soft); border:1px solid var(--line); border-radius:8px;
+            padding:14px 16px; font-size:.92rem; margin-bottom:26px; }
+  .passage .ttl{ font-weight:700; font-size:.8rem; letter-spacing:.04em; color:#777; text-transform:uppercase; margin-bottom:6px; }
+  .q{ margin:0 0 30px; padding-bottom:22px; border-bottom:1px dashed var(--line); }
+  .q .head{ display:flex; gap:8px; align-items:baseline; margin-bottom:8px; }
+  .q .no{ font-weight:700; font-size:1.02rem; } .q .prompt{ font-weight:600; }
+  .q .pts{ margin-left:auto; font-size:.78rem; color:#888; white-space:nowrap; }
+  .badge{ font-size:.68rem; padding:1px 7px; border-radius:10px; background:#fdeaec; color:var(--accent); border:1px solid #f0c9ce; }
+  .stim{ background:#fafafa; border-left:3px solid var(--line); padding:9px 13px; margin:8px 0 12px; font-size:.9rem; white-space:pre-line; }
+  .stim u{ text-decoration:underline; text-underline-offset:2px; }
+  .stim .mk{ font-size:.78em; vertical-align:.3em; color:var(--accent); margin-right:1px; }
+  .stim .boxsel{ border:1px solid #999; border-radius:4px; padding:0 4px; background:#fff; }
+  .stim .blank{ display:inline-block; min-width:90px; border-bottom:1.5px solid var(--ink); }
+  ol.choices{ list-style:none; padding:0; margin:6px 0 0; }
+  ol.choices li{ padding:5px 10px; border:1px solid transparent; border-radius:6px; cursor:pointer; font-size:.92rem; }
+  ol.choices li:hover{ background:var(--soft); }
+  ol.choices li.sel{ border-color:var(--accent); background:#fdeaec; }
+  ol.choices li.correct{ border-color:var(--ok); background:#e8f6ee; }
+  ol.choices li.wrong{ border-color:var(--no); background:#fdeaea; }
+  .wb{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+  .wb span{ border:1px solid #bbb; border-radius:14px; padding:3px 11px; font-size:.85rem; background:#fff; }
+  textarea, input.ans{ width:100%; font:inherit; font-size:.9rem; border:1px solid var(--line); border-radius:6px; padding:8px; }
+  textarea{ min-height:48px; } input.ans{ max-width:240px; }
+  .cond{ font-size:.8rem; color:#666; margin-top:6px; }
+  .xw{ display:grid; gap:2px; margin:10px 0; }
+  .xw .cell{ width:30px; height:30px; position:relative; }
+  .xw .cell.blk{ background:transparent; }
+  .xw .cell.on{ background:#fff; border:1.4px solid var(--ink); }
+  .xw .cell.star{ box-shadow:inset 0 0 0 2px var(--accent); }
+  .xw .cell .n{ position:absolute; top:0; left:1px; font-size:.5rem; color:#555; }
+  .xw .cell .ch{ display:flex; align-items:center; justify-content:center; height:100%; font-size:.95rem; font-weight:600; visibility:hidden; }
+  .xw .cell .st{ position:absolute; bottom:-2px; right:0px; font-size:.62rem; color:var(--accent); }
+  body.showteach .xw .cell .ch{ visibility:visible; }
+  .clues{ font-size:.84rem; } .clues b{ color:var(--accent); } .clues div{ margin:2px 0; }
+  .extract{ margin-top:10px; font-size:.88rem; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .result{ display:none; margin-top:8px; font-size:.84rem; border-radius:6px; padding:7px 11px; }
+  .result.ok{ background:#e8f6ee; border:1px solid #bfe6cf; color:var(--ok); }
+  .result.no{ background:#fdeaea; border:1px solid #f0c4c4; color:var(--no); }
+  .result.rev{ background:#fff6e6; border:1px solid #f0dcb0; color:var(--rev); }
+  .teach{ display:none; margin-top:10px; background:#f0faf6; border:1px solid #bfe6d7; border-radius:6px; padding:9px 12px; font-size:.84rem; }
+  body.showteach .teach{ display:block; }
+  .teach .lab{ font-weight:700; color:var(--teach); }
+  .ana{ margin:4px 0 0 0; padding-left:16px; } .ana li{ font-size:.8rem; }
+  .ana .err{ color:var(--accent); font-weight:600; } .ana .ok{ color:#3a7; }
+</style>
+</head>
+<body>
+<header class="sheet"><h1 id="title"></h1><div class="meta" id="meta"></div></header>
+<div class="controls">
+  <button class="grade" id="gbtn">채점하기</button>
+  <button class="reset" id="rbtn">다시 풀기</button>
+  <button class="toggle" id="tbtn">정답·해설 보기</button>
+  <span id="score"></span>
+</div>
+<div class="passage"><div class="ttl">Passage</div><div id="ptext"></div></div>
+<div id="questions"></div>
+
+<script>
+const RECORD = {"passage_id": "wirye-g1-2026-urbanforest01", "meta": {"reference": "위례고", "grade": "1", "variation": "중", "level": "표준", "scale": "선택형 6 + 서술형(특수) 1 — 표준 5+1에서 시그니처 영영퍼즐 재투입(§10)", "engine": "공통 출제 엔진 v2(v1_4)"}, "passage": {"title": "Melbourne's Urban Forest Strategy", "text": "The story behind these emails starts with Melbourne's Urban Forest Strategy, which was created in response to Australia's millennium drought. That drought ran from the late 1990s until 2010. By the time it was over, 40 percent of the city's 77,000 trees were in declining health, and the total number of trees was falling.\n\nBecause of this, the shade that trees cast over the city—known as canopy cover—shrank. Losing canopy cover is a serious danger to cities because it pushes temperatures up. Higher urban temperatures can be harmful to residents, raising the risk of heat exhaustion. They also drive up the use of air-conditioning, which accelerates climate change by increasing energy use and greenhouse gas emissions.\n\nClearly, something had to be done about the loss of Melbourne's trees. In 2012 the city government launched its Urban Forest Strategy, setting the ambitious target of planting more than 3,000 trees a year for the next two decades. The plan also led to an online map called the Urban Forest Visual.\n\nThis interactive map displays the location of every single tree in the city's parks and along its streets. Colors and symbols show each tree's age and genus, and users can click a tree to learn its species—and even send it an email. At first, the \"Email this tree\" feature had one specific purpose: it let people easily inform council workers about trees that were damaged or in poor health."}, "questions": [{"id": "q1", "type": "대의_제목", "tags": ["대의", "제목"], "points": 3.3, "prompt": "다음 글의 제목으로 가장 적절한 것은?", "choices": ["① How Melbourne Is Fighting Tree Loss with an Urban Forest Plan", "② The Best Smartphone Apps for Nature Lovers", "③ Why Australia's Millennium Drought Finally Ended", "④ The Science of Photosynthesis in City Trees", "⑤ Heat Exhaustion: A Hidden Danger for Drivers"], "answer": "①", "rationale": "가뭄으로 인한 나무·수관 손실 → 도시 문제 → 2012년 도시숲 전략·온라인 지도·이메일 기능이라는 대응이 글의 뼈대. ③은 가뭄 종료 원인(다루지 않음), ④⑤②는 지엽·초점 이탈."}, {"id": "q2", "type": "정밀대조_표정리_부적절", "tags": ["정밀대조", "표정리", "인과"], "points": 3.4, "prompt": "다음은 윗글에서 수관(canopy) 손실이 도시에 미치는 영향을 정리한 것이다. 글과 일치하지 않는 것은?", "stimulus": "[수관(canopy cover) 손실 → 도시에 미치는 영향]", "choices": ["① 도시 기온이 상승한다.", "② 주민들의 열탈진(heat exhaustion) 위험이 커진다.", "③ 에어컨 사용이 늘어난다.", "④ 에너지 소비가 줄어 온실가스 배출이 감소한다.", "⑤ 에너지 소비·배출 증가로 기후변화가 빨라진다."], "answer": "④", "rationale": "본문은 에어컨 사용 증가가 '에너지 소비와 온실가스 배출을 늘려' 기후변화를 가속한다고 함(⑤). ④는 이를 '감소'로 뒤집은 진술 → 불일치."}, {"id": "q3", "type": "정밀대조_일치", "tags": ["정밀대조", "일치"], "points": 3.4, "prompt": "다음 글의 내용과 일치하는 것은?", "choices": ["① 밀레니엄 가뭄은 2010년대 내내 계속되었다.", "② 가뭄이 끝날 무렵 도시 나무의 절반 이상이 건강이 나빠졌다.", "③ 도시 정부는 매년 3,000그루를 10년간 심기로 했다.", "④ Urban Forest Visual 지도는 공원의 나무만 보여 준다.", "⑤ '이 나무에 이메일 보내기' 기능은 원래 손상·병든 나무를 알리기 위한 것이었다."], "answer": "⑤", "rationale": "⑤는 본문과 일치(council 직원에게 손상·병든 나무를 알리는 용도). ① 1990년대 후반~2010, ② 40%, ③ 20년, ④ 공원과 도로변 모든 나무 → 모두 불일치."}, {"id": "q4", "type": "어법_네모ABC", "tags": ["어법", "자타동사(태)", "분사태", "동사vs준동사"], "points": 3.5, "prompt": "(A), (B), (C)의 각 네모 안에서 어법상 알맞은 것끼리 짝지은 것은?", "stimulus": "The loss of canopy cover (A)[ raises / rises ] city temperatures. The plan involved an online map (B)[ called / calling ] the Urban Forest Visual, and it set a goal of (C)[ planting / to plant ] more than 3,000 trees a year.", "choices": ["① rises - called - planting", "② raises - calling - planting", "③ raises - called - planting", "④ raises - called - to plant", "⑤ rises - calling - to plant"], "answer": "③", "rationale": "(A) 목적어 temperatures를 취하는 타동사 raise → raises(자동사 rise와 구별). (B) map이 ~로 '불리는' 수동 → 과거분사 called. (C) 전치사 of 뒤 동명사 planting.", "analysis": [{"marker": "(A)", "verdict": "raises", "point": "타동사 raise(+목적어 temperatures) — 자동사 rise와 구별 (태/자타동사)"}, {"marker": "(B)", "verdict": "called", "point": "map이 불리는 수동 → 과거분사 called (분사 능수동)"}, {"marker": "(C)", "verdict": "planting", "point": "전치사 of 뒤 동명사 planting (동사 vs 준동사)"}], "self_check": {"intended_count": 1, "verified_count": 1, "trap_types": ["자타동사(태)", "분사능수동(태)", "동사vs준동사"]}}, {"id": "q5", "type": "어휘_부적절_1개고르기", "tags": ["어휘", "혼동어", "genus/genius"], "points": 3.4, "prompt": "다음 글의 밑줄 친 부분 중 문맥상 낱말의 쓰임이 적절하지 않은 것은?", "stimulus": "The interactive map [[① indicates]] each tree's age and [[② genius]], and users can [[③ click]] a tree to find its species. The \"Email this tree\" tool was first [[④ designed]] to let people [[⑤ inform]] council workers about damaged trees.", "choices": ["① indicates", "② genius", "③ click", "④ designed", "⑤ inform"], "answer": "②", "rationale": "지도는 나무의 '속(genus, 생물 분류 단위)'을 표시한다. genius(천재)는 형태가 비슷한 혼동어로 의미가 어긋남 → genus로 고쳐야 한다."}, {"id": "q6", "type": "문장삽입", "tags": ["로테이션", "문장삽입"], "points": 3.5, "prompt": "글의 흐름으로 보아, 주어진 문장이 들어가기에 가장 적절한 곳은?", "stimulus": "<주어진 문장> They also drive up the use of air-conditioning, which accelerates climate change by increasing energy use and emissions.\n\nThe loss of canopy cover pushes city temperatures up. ( ① ) Higher urban temperatures can be harmful to residents, raising the risk of heat exhaustion. ( ② ) So something had to be done about Melbourne's tree loss, and in 2012 the city launched its Urban Forest Strategy. ( ③ ) The plan aimed to plant more than 3,000 trees a year for twenty years. ( ④ ) It also created an online map, the Urban Forest Visual. ( ⑤ )", "choices": ["①", "②", "③", "④", "⑤"], "answer": "②", "rationale": "주어진 문장의 'They also ~'는 '더 높은 기온(higher temperatures)'을 받고, 열탈진이라는 한 영향에 '또 다른 영향(에어컨↑)'을 더한다. 따라서 열탈진 문장 바로 뒤인 ②가 적절."}, {"id": "q7", "type": "영영풀이퍼즐", "tags": ["특수", "영영퍼즐", "검수요망"], "points": 4.0, "prompt": "각 영영 풀이에 해당하는 본문 단어를 격자에 채우고, Ⓐ~Ⓔ 칸의 철자를 순서대로 모아 숨은 단어를 쓰시오.", "answer": "SHADE", "accepted_answers": {"hidden": ["SHADE", "shade"]}, "puzzle_note": "hidden=SHADE(canopy cover=그늘). 단어는 모두 본문에 실재: species(S)·health(H)·canopy(A)·drought(D)·energy(E). 격자·마커·번호는 결정론적 솔버(crossword_solver)가 생성·검증.", "rationale": "Ⓐ SPECIES의 S, Ⓑ HEALTH의 H, Ⓒ CANOPY의 A, Ⓓ DROUGHT의 D, Ⓔ ENERGY의 E → SHADE. 수관 손실(그늘 감소)이 글의 핵심 문제와 연결."}], "set_memo": {"대의": "제목 (set7 목적 → 전환)", "정밀대조": ["표 정리(인과 사슬: 수관↓→기온↑→열탈진/에어컨→배출↑)", "내용 일치(수치·사실)"], "오류탐지": ["어법 네모 (A)(B)(C) — 자타동사·분사태·동사vs준동사(정답 ③)", "어휘 혼동어 genus/genius(정답 ②)"], "어법_served_type": "네모 (A)(B)(C) (set7 1개 고르기 → 전환). 함정 수일치 회피 → 자타동사·분사·동명사.", "로테이션": "문장 삽입 — 흐름 유형, 7세트 만에 신규 (set7 요약문 → 전환). 단서 'They also'+화제 연속으로 표준 난이도.", "특수": "영영퍼즐 SHADE 재투입 (§10: set4 이후 3세트 미사용 → 복귀)", "정답분산": "① ④ ⑤ ③ ② ② (선택형 6문항; ②는 어휘·문장삽입 2회)", "검수요망": ["q7 영영퍼즐: 단어의 본문 실재성·영영 정의 정확도·hidden 적절성(추출=SHADE는 솔버로 기계검증 완료, 의미 검수는 교사)"], "variation_note": "중: 동의어 치환·문장별 패러프레이즈, 문단 구조·순서 보존. 퍼즐 단어 5개 보존.", "level_note": "표준: 저배점(3.3~3.5), 함정 문항당 1종·약하게, 정답 또렷. 문장삽입은 단서 또렷이 남김(§13.4).", "cross_set_prev": ["set1 digitalmin / set2 iceage / set3 workingmem / set4 gesture / set5 deforest / set6 emotion / set7 treemail", "set7 treemail (목적/불일치·잘못이해/1개고르기·수일치/반의어/요약문, 퍼즐 없음)"]}};
+const GRID   = {"rows": 7, "cols": 11, "hidden": "SHADE", "cells": [{"r": 0, "c": 6, "ch": "H", "num": 1, "mark": "Ⓑ"}, {"r": 1, "c": 2, "ch": "C", "num": 2, "mark": null}, {"r": 1, "c": 4, "ch": "S", "num": 3, "mark": "Ⓐ"}, {"r": 1, "c": 5, "ch": "P", "num": null, "mark": null}, {"r": 1, "c": 6, "ch": "E", "num": null, "mark": null}, {"r": 1, "c": 7, "ch": "C", "num": null, "mark": null}, {"r": 1, "c": 8, "ch": "I", "num": null, "mark": null}, {"r": 1, "c": 9, "ch": "E", "num": 4, "mark": "Ⓔ"}, {"r": 1, "c": 10, "ch": "S", "num": null, "mark": null}, {"r": 2, "c": 2, "ch": "A", "num": null, "mark": "Ⓒ"}, {"r": 2, "c": 6, "ch": "A", "num": null, "mark": null}, {"r": 2, "c": 9, "ch": "N", "num": null, "mark": null}, {"r": 3, "c": 2, "ch": "N", "num": null, "mark": null}, {"r": 3, "c": 6, "ch": "L", "num": null, "mark": null}, {"r": 3, "c": 9, "ch": "E", "num": null, "mark": null}, {"r": 4, "c": 0, "ch": "D", "num": 5, "mark": "Ⓓ"}, {"r": 4, "c": 1, "ch": "R", "num": null, "mark": null}, {"r": 4, "c": 2, "ch": "O", "num": null, "mark": null}, {"r": 4, "c": 3, "ch": "U", "num": null, "mark": null}, {"r": 4, "c": 4, "ch": "G", "num": null, "mark": null}, {"r": 4, "c": 5, "ch": "H", "num": null, "mark": null}, {"r": 4, "c": 6, "ch": "T", "num": null, "mark": null}, {"r": 4, "c": 9, "ch": "R", "num": null, "mark": null}, {"r": 5, "c": 2, "ch": "P", "num": null, "mark": null}, {"r": 5, "c": 6, "ch": "H", "num": null, "mark": null}, {"r": 5, "c": 9, "ch": "G", "num": null, "mark": null}, {"r": 6, "c": 2, "ch": "Y", "num": null, "mark": null}, {"r": 6, "c": 9, "ch": "Y", "num": null, "mark": null}], "across": [{"num": 3, "word": "SPECIES", "clue": "a group of living things that can breed with one another", "len": 7}, {"num": 5, "word": "DROUGHT", "clue": "a long period with little or no rain", "len": 7}], "down": [{"num": 1, "word": "HEALTH", "clue": "the condition of being well and free from illness", "len": 6}, {"num": 2, "word": "CANOPY", "clue": "the cover formed by the leafy upper branches of trees", "len": 6}, {"num": 4, "word": "ENERGY", "clue": "the power, such as electricity, used to do work or run machines", "len": 6}], "marks": [{"label": "Ⓐ", "letter": "S", "word": "SPECIES"}, {"label": "Ⓑ", "letter": "H", "word": "HEALTH"}, {"label": "Ⓒ", "letter": "A", "word": "CANOPY"}, {"label": "Ⓓ", "letter": "D", "word": "DROUGHT"}, {"label": "Ⓔ", "letter": "E", "word": "ENERGY"}]};
+const responses = {};
+const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const norm = s => (s==null?'':String(s)).toLowerCase().replace(/[.,!?;:'"()]/g,'').replace(/\s+/g,' ').trim();
+
+function renderStim(s){
+  if(!s) return '';
+  let h = esc(s);
+  h = h.replace(/\[\[(\S) (.*?)\]\]/g,(m,mk,w)=>`<span class="mk">${mk}</span><u>${w}</u>`);
+  h = h.replace(/\[([^\[\]]*?\/[^\[\]]*?)\]/g,(m,inner)=>`<span class="boxsel">[${inner}]</span>`);
+  h = h.replace(/_{3,}/g,'<span class="blank"></span>');
+  return h;
+}
+
+document.getElementById('title').textContent = RECORD.passage.title;
+const m = RECORD.meta;
+document.getElementById('meta').innerHTML =
+  `레퍼런스 <b>${m.reference}</b> · 고${m.grade} · variation ${m.variation} · level ${m.level} · ${RECORD.passage_id}`;
+document.getElementById('ptext').textContent = RECORD.passage.text;
+const box = document.getElementById('questions');
+
+function choiceList(q){
+  const ol=document.createElement('ol'); ol.className='choices';
+  q.choices.forEach(c=>{
+    const li=document.createElement('li'); li.textContent=c; li.dataset.sym=c.trim().charAt(0);
+    li.onclick=()=>{ [...ol.children].forEach(x=>x.classList.remove('sel')); li.classList.add('sel');
+      responses[q.id]=li.dataset.sym; };
+    ol.appendChild(li);
+  });
+  return ol;
+}
+
+function crossword(q){
+  const wrap=document.createElement('div');
+  const g=document.createElement('div'); g.className='xw';
+  g.style.gridTemplateColumns=`repeat(${GRID.cols},30px)`;
+  const map={}; GRID.cells.forEach(c=>map[c.r+'_'+c.c]=c);
+  for(let r=0;r<GRID.rows;r++){ for(let c=0;c<GRID.cols;c++){
+    const cell=document.createElement('div'); cell.className='cell'; const d=map[r+'_'+c];
+    if(d){ cell.classList.add('on'); if(d.mark) cell.classList.add('star');
+      if(d.num) cell.innerHTML+=`<span class="n">${d.num}</span>`;
+      cell.innerHTML+=`<span class="ch">${d.ch}</span>`;
+      if(d.mark) cell.innerHTML+=`<span class="st">${d.mark}</span>`;
+    } else cell.classList.add('blk');
+    g.appendChild(cell);
+  }}
+  wrap.appendChild(g);
+  const cl=document.createElement('div'); cl.className='clues';
+  let html='<div><b>ACROSS →</b></div>';
+  GRID.across.forEach(e=>html+=`<div>${e.num}. (${e.len}) ${esc(e.clue)}</div>`);
+  html+='<div style="margin-top:6px"><b>DOWN ↓</b></div>';
+  GRID.down.forEach(e=>html+=`<div>${e.num}. (${e.len}) ${esc(e.clue)}</div>`);
+  cl.innerHTML=html; wrap.appendChild(cl);
+  const ex=document.createElement('div'); ex.className='extract';
+  const last=GRID.marks[GRID.marks.length-1].label;
+  const lab=document.createElement('span'); lab.textContent=`Ⓐ~${last} 칸 철자를 순서대로 모은 단어:`;
+  const inp=document.createElement('input'); inp.className='ans'; inp.placeholder='숨은 단어';
+  inp.oninput=()=>responses[q.id]=inp.value;
+  ex.appendChild(lab); ex.appendChild(inp); wrap.appendChild(ex);
+  return wrap;
+}
+
+RECORD.questions.forEach((q,i)=>{
+  const div=document.createElement('div'); div.className='q'; div.dataset.qi=i;
+  const head=document.createElement('div'); head.className='head';
+  const tags=(q.tags||[]).map(t=>`<span class="badge">${t}</span>`).join(' ');
+  head.innerHTML=`<span class="no">${i+1}.</span><span class="prompt">${esc(q.prompt)} ${tags}</span><span class="pts">[${q.points}점]</span>`;
+  div.appendChild(head);
+  if(q.stimulus){ const st=document.createElement('div'); st.className='stim'; st.innerHTML=renderStim(q.stimulus); div.appendChild(st); }
+
+  if(q.type==='영영풀이퍼즐'){ div.appendChild(crossword(q)); }
+  else if(q.choices){ div.appendChild(choiceList(q)); }
+  else if(q.type==='서술형_조건영작'){
+    if(q.korean_prompt){ const k=document.createElement('div'); k.style.cssText='font-size:.88rem;margin:4px 0'; k.textContent='우리말: '+q.korean_prompt; div.appendChild(k); }
+    if(q.word_bank){ const wb=document.createElement('div'); wb.className='wb'; q.word_bank.forEach(w=>{const s=document.createElement('span');s.textContent=w;wb.appendChild(s);}); div.appendChild(wb); }
+    const ta=document.createElement('textarea'); ta.placeholder='여기에 영작'; ta.oninput=()=>responses[q.id]=ta.value; div.appendChild(ta);
+    const cd=document.createElement('div'); cd.className='cond'; cd.textContent='<조건> 보기를 모두 한 번씩 사용, 어형 변형 없이 배열'; div.appendChild(cd);
+  } else {
+    const ta=document.createElement('textarea'); ta.placeholder='답안 작성'; ta.oninput=()=>responses[q.id]=ta.value; div.appendChild(ta);
+  }
+
+  const res=document.createElement('div'); res.className='result'; div.appendChild(res);
+
+  const t=document.createElement('div'); t.className='teach';
+  let th=`<span class="lab">정답:</span> ${esc(typeof q.answer==='object'?JSON.stringify(q.answer):(q.answer||q.answer_arrangement||''))}`;
+  if(q.answer_arrangement) th+=`<br><span class="lab">배열:</span> ${esc(q.answer_arrangement)}`;
+  if(q.rationale) th+=`<br><span class="lab">해설:</span> ${esc(q.rationale)}`;
+  if(q.self_check) th+=`<br><span class="lab">self_check:</span> 의도 ${q.self_check.intended_count}/검증 ${q.self_check.verified_count} ${q.self_check.trap_types?'· '+q.self_check.trap_types.join(','):''}`;
+  if(q.analysis){ th+='<ul class="ana">'; q.analysis.forEach(a=>{ th+=`<li><span class="${a.verdict==='오류'?'err':'ok'}">${a.marker} ${a.verdict}</span> — ${esc(a.point)}</li>`; }); th+='</ul>'; }
+  if(q.puzzle_note) th+=`<br><span class="lab">숨은 단어:</span> ${esc(GRID.hidden)} (${GRID.marks.map(x=>x.label+'='+x.letter).join(' ')})<br><span class="lab">퍼즐:</span> ${esc(q.puzzle_note)}`;
+  t.innerHTML=th; div.appendChild(t);
+  box.appendChild(div);
+});
+
+// 채점
+function correctSet(q){
+  if(q.type==='영영풀이퍼즐') return (q.accepted_answers&&q.accepted_answers.hidden)||[q.answer];
+  if(q.type==='서술형_조건영작') return q.accepted_answers||[q.answer_arrangement];
+  return [q.answer];
+}
+function grade(){
+  let earned=0,total=0,objTotal=0,objEarned=0,review=[];
+  const cards=document.querySelectorAll('.q');
+  RECORD.questions.forEach((q,i)=>{
+    total+=q.points; const card=cards[i]; const res=card.querySelector('.result');
+    const r=responses[q.id]; let ok=false,status,expected;
+    if(q.choices){
+      objTotal+=q.points; expected=q.answer; ok=(r||'')===q.answer; status=ok?'정답':'오답';
+      const lis=card.querySelectorAll('ol.choices li');
+      lis.forEach(li=>{ if(li.dataset.sym===q.answer) li.classList.add('correct');
+        if(li.classList.contains('sel') && !ok) li.classList.add('wrong'); });
+      if(ok) objEarned+=q.points;
+    } else if(q.type==='영영풀이퍼즐'){
+      const acc=correctSet(q); objTotal+=q.points; expected=acc.join(' / ');
+      ok=acc.some(a=>norm(a)===norm(r)); status=ok?'정답':'오답'; if(ok) objEarned+=q.points;
+    } else if(q.type==='서술형_조건영작'){
+      const acc=correctSet(q); expected=acc.join(' / ');
+      ok=acc.some(a=>norm(a)===norm(r)); status=ok?'정답(자동일치)':'검수 필요'; if(!ok) review.push(i+1);
+    } else { status='검수 필요'; expected=q.answer||''; review.push(i+1); }
+    if(ok) earned+=q.points;
+    res.style.display='block';
+    res.className='result '+(ok?'ok':(status==='검수 필요'?'rev':'no'));
+    res.innerHTML=`<b>${ok?'✓ '+status:(status==='검수 필요'?'⚠ '+status:'✗ '+status)}</b> · 정답: ${esc(expected)}`
+      +(q.rationale?`<br>해설: ${esc(q.rationale)}`:'');
+  });
+  const s=document.getElementById('score'); s.style.display='inline';
+  s.innerHTML=`자동채점 <b>${objEarned.toFixed(1)} / ${objTotal.toFixed(1)}점</b>`
+    +(review.length?` · 서술형 검수 필요: ${review.join(', ')}번`:'')
+    +` · (전체 ${total.toFixed(1)}점)`;
+}
+function reset(){
+  for(const k in responses) delete responses[k];
+  document.querySelectorAll('ol.choices li').forEach(li=>li.classList.remove('sel','correct','wrong'));
+  document.querySelectorAll('textarea, input.ans').forEach(e=>e.value='');
+  document.querySelectorAll('.result').forEach(r=>{r.style.display='none';r.innerHTML='';});
+  document.getElementById('score').style.display='none';
+}
+document.getElementById('gbtn').onclick=grade;
+document.getElementById('rbtn').onclick=reset;
+const btn=document.getElementById('tbtn');
+btn.onclick=()=>{ document.body.classList.toggle('showteach'); btn.classList.toggle('on');
+  btn.textContent=document.body.classList.contains('showteach')?'학생 보기로':'정답·해설 보기'; };
+</script>
+</body>
+</html>
