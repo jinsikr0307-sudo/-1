@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>변형문제 — 학생용</title>
+<style>
+  :root{ --ink:#1a1a1a; --line:#cfcfcf; --soft:#f6f6f4; --accent:#7a1f2b; --teach:#0b6b53;
+         --ok:#1c7c4a; --no:#b3261e; --rev:#a86b00; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Noto Serif KR',Georgia,'Times New Roman',serif; color:var(--ink);
+        max-width:820px; margin:0 auto; padding:28px 22px 100px; line-height:1.6; background:#fff; }
+  header.sheet{ border-bottom:2.5px solid var(--ink); padding-bottom:12px; margin-bottom:18px; }
+  .sheet h1{ font-size:1.35rem; margin:0 0 4px; }
+  .meta{ font-size:.82rem; color:#555; } .meta b{ color:var(--accent); }
+  .controls{ position:sticky; top:0; background:#fff; padding:10px 0; border-bottom:1px solid var(--line);
+             margin-bottom:18px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; z-index:5; }
+  button{ font:inherit; font-size:.85rem; padding:6px 14px; border-radius:20px; cursor:pointer; }
+  button.grade{ border:1.5px solid var(--accent); color:#fff; background:var(--accent); }
+  button.reset{ border:1.5px solid #aaa; color:#555; background:#fff; }
+  button.toggle{ border:1.5px solid var(--teach); color:var(--teach); background:#fff; }
+  button.toggle.on{ background:var(--teach); color:#fff; }
+  #score{ display:none; font-size:.92rem; font-weight:600; margin-left:auto; }
+  #score b{ color:var(--accent); }
+  .passage{ background:var(--soft); border:1px solid var(--line); border-radius:8px;
+            padding:14px 16px; font-size:.92rem; margin-bottom:26px; }
+  .passage .ttl{ font-weight:700; font-size:.8rem; letter-spacing:.04em; color:#777; text-transform:uppercase; margin-bottom:6px; }
+  .q{ margin:0 0 30px; padding-bottom:22px; border-bottom:1px dashed var(--line); }
+  .q .head{ display:flex; gap:8px; align-items:baseline; margin-bottom:8px; }
+  .q .no{ font-weight:700; font-size:1.02rem; } .q .prompt{ font-weight:600; }
+  .q .pts{ margin-left:auto; font-size:.78rem; color:#888; white-space:nowrap; }
+  .badge{ font-size:.68rem; padding:1px 7px; border-radius:10px; background:#fdeaec; color:var(--accent); border:1px solid #f0c9ce; }
+  .stim{ background:#fafafa; border-left:3px solid var(--line); padding:9px 13px; margin:8px 0 12px; font-size:.9rem; white-space:pre-line; }
+  .stim u{ text-decoration:underline; text-underline-offset:2px; }
+  .stim .mk{ font-size:.78em; vertical-align:.3em; color:var(--accent); margin-right:1px; }
+  .stim .boxsel{ border:1px solid #999; border-radius:4px; padding:0 4px; background:#fff; }
+  .stim .blank{ display:inline-block; min-width:90px; border-bottom:1.5px solid var(--ink); }
+  ol.choices{ list-style:none; padding:0; margin:6px 0 0; }
+  ol.choices li{ padding:5px 10px; border:1px solid transparent; border-radius:6px; cursor:pointer; font-size:.92rem; }
+  ol.choices li:hover{ background:var(--soft); }
+  ol.choices li.sel{ border-color:var(--accent); background:#fdeaec; }
+  ol.choices li.correct{ border-color:var(--ok); background:#e8f6ee; }
+  ol.choices li.wrong{ border-color:var(--no); background:#fdeaea; }
+  .wb{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+  .wb span{ border:1px solid #bbb; border-radius:14px; padding:3px 11px; font-size:.85rem; background:#fff; }
+  textarea, input.ans{ width:100%; font:inherit; font-size:.9rem; border:1px solid var(--line); border-radius:6px; padding:8px; }
+  textarea{ min-height:48px; } input.ans{ max-width:240px; }
+  .cond{ font-size:.8rem; color:#666; margin-top:6px; }
+  .xw{ display:grid; gap:2px; margin:10px 0; }
+  .xw .cell{ width:30px; height:30px; position:relative; }
+  .xw .cell.blk{ background:transparent; }
+  .xw .cell.on{ background:#fff; border:1.4px solid var(--ink); }
+  .xw .cell.star{ box-shadow:inset 0 0 0 2px var(--accent); }
+  .xw .cell .n{ position:absolute; top:0; left:1px; font-size:.5rem; color:#555; }
+  .xw .cell .ch{ display:flex; align-items:center; justify-content:center; height:100%; font-size:.95rem; font-weight:600; visibility:hidden; }
+  .xw .cell .st{ position:absolute; bottom:-2px; right:0px; font-size:.62rem; color:var(--accent); }
+  body.showteach .xw .cell .ch{ visibility:visible; }
+  .clues{ font-size:.84rem; } .clues b{ color:var(--accent); } .clues div{ margin:2px 0; }
+  .extract{ margin-top:10px; font-size:.88rem; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .result{ display:none; margin-top:8px; font-size:.84rem; border-radius:6px; padding:7px 11px; }
+  .result.ok{ background:#e8f6ee; border:1px solid #bfe6cf; color:var(--ok); }
+  .result.no{ background:#fdeaea; border:1px solid #f0c4c4; color:var(--no); }
+  .result.rev{ background:#fff6e6; border:1px solid #f0dcb0; color:var(--rev); }
+  .teach{ display:none; margin-top:10px; background:#f0faf6; border:1px solid #bfe6d7; border-radius:6px; padding:9px 12px; font-size:.84rem; }
+  body.showteach .teach{ display:block; }
+  .teach .lab{ font-weight:700; color:var(--teach); }
+  .ana{ margin:4px 0 0 0; padding-left:16px; } .ana li{ font-size:.8rem; }
+  .ana .err{ color:var(--accent); font-weight:600; } .ana .ok{ color:#3a7; }
+</style>
+</head>
+<body>
+<header class="sheet"><h1 id="title"></h1><div class="meta" id="meta"></div></header>
+<div class="controls">
+  <button class="grade" id="gbtn">채점하기</button>
+  <button class="reset" id="rbtn">다시 풀기</button>
+  <button class="toggle" id="tbtn">정답·해설 보기</button>
+  <span id="score"></span>
+</div>
+<div class="passage"><div class="ttl">Passage</div><div id="ptext"></div></div>
+<div id="questions"></div>
+
+<script>
+const RECORD = {"passage_id": "wirye-g1-2026-gesture01", "meta": {"reference": "위례고", "grade": "1", "variation": "중", "level": "표준", "scale": "선택형 6 + 서술형(특수) 1 — 표준 5+1에서 시그니처 영영퍼즐 재투입(§10)", "engine": "공통 출제 엔진 v2(v1_4)"}, "passage": {"title": "Why Gesturing Helps You Remember", "text": "If you gesture while describing an event, do you think you will recall it better than if you stay still? We had adults watch videos of toy objects, animals, and people carrying out various, sometimes strange, actions: a chicken sliding up to a policeman, a jogger bending down to touch his toes, a fence swinging shut on its own. We then tested how well the adults remembered these events, both right after they described them and again three weeks later. Those who had been told to gesture while describing the events recalled more than those who had been told not to, especially several weeks afterward. To find out whether spontaneous gesture would have the same effect, we ran the study once more, this time giving no instructions about gesturing. The pattern held: people remembered the items they had gestured on of their own accord better than the items they had not. Producing gesture along with speech makes the information encoded in that speech memorable."}, "questions": [{"id": "q1", "type": "대의_요지", "tags": ["대의", "요지"], "points": 3.3, "prompt": "다음 글의 요지로 가장 적절한 것은?", "choices": ["① 말하면서 제스처를 취하면 그 내용을 더 잘 기억할 수 있다.", "② 제스처는 의사소통을 방해하므로 가급적 자제해야 한다.", "③ 성인은 아동보다 사건을 더 정확하게 기억한다.", "④ 기이한 동작일수록 사람들의 기억에 더 오래 남는다.", "⑤ 반복 학습 없이는 장기 기억이 형성되지 않는다."], "answer": "①", "rationale": "지시·자발 두 실험 모두 '제스처한 항목을 더 잘 기억'했고 마지막 문장이 결론을 명시. ②④⑤는 본문이 다루지 않거나 반박하는 통념, ③은 비교 대상이 본문에 없음."}, {"id": "q2", "type": "정밀대조_불일치", "tags": ["정밀대조", "불일치"], "points": 3.4, "prompt": "다음 글의 내용과 일치하지 않는 것은?", "choices": ["① 성인들은 사물·동물·사람이 다양한 동작을 하는 영상을 보았다.", "② 기억은 설명 직후와 3주 뒤에 검사되었다.", "③ 제스처를 하라고 지시받은 집단이 그러지 않은 집단보다 더 많이 기억했다.", "④ 두 번째 연구에서는 참가자들에게 제스처를 하라고 지시했다.", "⑤ 자발적으로 제스처한 항목을 그러지 않은 항목보다 더 잘 기억했다."], "answer": "④", "rationale": "두 번째 연구는 '제스처에 대해 아무 지시도 주지 않고(no instructions)' 자발적 제스처를 관찰했다. ④는 이를 정반대로 진술 → 불일치."}, {"id": "q3", "type": "정밀대조_답할수있는질문", "tags": ["정밀대조", "답할수있는질문"], "points": 3.4, "prompt": "다음 글을 읽고 답할 수 있는 질문은?", "choices": ["① How many adults took part in the first study?", "② Were the adults' memories tested again about three weeks later?", "③ What were the exact ages of the participants?", "④ How long was each video that the adults watched?", "⑤ Which gesture did most adults make spontaneously?"], "answer": "②", "rationale": "②는 본문에 명시(직후+3주 뒤 검사)되어 답 가능. ①③④⑤(인원수·연령·영상 길이·구체적 제스처)는 언급이 없어 답할 수 없음."}, {"id": "q4", "type": "어법_네모ABC", "tags": ["어법", "사역동사보어", "분사태", "동사vs준동사"], "points": 3.5, "prompt": "(A), (B), (C)의 각 네모 안에서 어법상 알맞은 것끼리 짝지은 것은?", "stimulus": "We had adults (A)[ watch / to watch ] videos of toy objects, animals, and people performing odd actions—a chicken sliding to a policeman, a fence (B)[ swinging / swung ] shut on its own. Producing gesture along with speech (C)[ makes / making ] the information in that speech memorable.", "choices": ["① to watch - swinging - makes", "② watch - swung - makes", "③ to watch - swung - making", "④ watch - swung - making", "⑤ watch - swinging - makes"], "answer": "⑤", "rationale": "(A) 사역동사 have+목적격보어 원형 → watch. (B) 울타리가 스스로 닫히는 능동 → 현재분사 swinging. (C) 동명사 주어 Producing ...의 정동사 → makes.", "analysis": [{"marker": "(A)", "verdict": "watch", "point": "사역동사 had + 목적격보어 원형부정사 watch"}, {"marker": "(B)", "verdict": "swinging", "point": "fence가 스스로 닫히는 능동 → 현재분사 swinging (분사 능수동/태)"}, {"marker": "(C)", "verdict": "makes", "point": "동명사구 주어의 정동사 makes (동사 vs 준동사)"}], "self_check": {"intended_count": 1, "verified_count": 1, "trap_types": ["사역동사보어", "분사능수동(태)", "동사vs준동사"]}}, {"id": "q5", "type": "어휘_부적절_1개고르기", "tags": ["어휘", "혼동어", "affect/effect"], "points": 3.4, "prompt": "다음 글의 밑줄 친 부분 중 문맥상 낱말의 쓰임이 적절하지 않은 것은?", "stimulus": "Adults who were told to gesture [[① remembered]] more than those who were not, [[② particularly]] several weeks later. To see whether spontaneous gesture had the same [[③ affect]], we repeated the study with no instructions. Gesturing on one's own still [[④ helped]], making the information more [[⑤ memorable]].", "choices": ["① remembered", "② particularly", "③ affect", "④ helped", "⑤ memorable"], "answer": "③", "rationale": "'the same ___' 자리에는 명사 effect(영향·효과)가 필요. affect는 형태가 비슷한 동사(영향을 주다)로 쓰인 혼동어 → effect로 고쳐야 함."}, {"id": "q6", "type": "빈칸추론_단일", "tags": ["로테이션", "빈칸추론"], "points": 3.5, "prompt": "다음 빈칸에 들어갈 말로 가장 적절한 것은?", "stimulus": "Across both studies, people remembered the events they had gestured on better than those they had not. Producing gesture along with speech makes the information encoded in that speech ____.", "choices": ["① memorable", "② misleading", "③ unnecessary", "④ temporary", "⑤ identical"], "answer": "①", "rationale": "두 실험의 공통 결과(제스처한 항목을 더 잘 기억)가 곧 결론 → 정보를 '기억에 남게(memorable)' 만든다. 나머지는 본문 결과와 상충."}, {"id": "q7", "type": "영영풀이퍼즐", "tags": ["특수", "영영퍼즐", "검수요망"], "points": 4.0, "prompt": "각 영영 풀이에 해당하는 본문 단어를 격자에 채우고, Ⓐ~Ⓔ 칸의 철자를 순서대로 모아 숨은 단어를 쓰시오.", "answer": "TRACE", "accepted_answers": {"hidden": ["TRACE", "trace"]}, "puzzle_note": "hidden=TRACE(기억 흔적). 단어는 모두 본문에 실재: gesture(T)·recall(R)·animals(A)·chicken(C)·encoded(E). 격자·마커·번호는 결정론적 솔버(crossword_solver)가 생성·검증.", "rationale": "Ⓐ GESTURE의 T, Ⓑ RECALL의 R, Ⓒ ANIMALS의 A, Ⓓ CHICKEN의 C, Ⓔ ENCODED의 E → TRACE. 제스처가 '기억 흔적'을 강화한다는 주제와 연결."}], "set_memo": {"대의": "요지 (set2 제목 / set3 주제 → 전환)", "정밀대조": ["내용 불일치", "답할 수 있는 질문"], "오류탐지": ["어법 네모 (A)(B)(C) — 사역·분사태·동사vs준동사(정답 ⑤)", "어휘 혼동어 affect/effect(정답 ③)"], "어법_served_type": "네모 (A)(B)(C) (set3 1개 고르기 → 전환). 함정도 형용사vs부사 → 사역·분사태·동사준동사로 교체.", "로테이션": "빈칸 추론(단일) — 선택형 로테이션 신규 (set1/3 조건영작·set2 요약문 → 전환)", "특수": "영영퍼즐 TRACE 재투입 (§10: set2·set3 연속 미사용 후 복귀)", "정답분산": "① ④ ② ⑤ ③ ① (선택형 6문항)", "검수요망": ["q7 영영퍼즐: 단어의 본문 실재성·영영 정의 정확도·hidden 적절성(추출=TRACE는 솔버로 기계검증 완료, 의미 검수는 교사)"], "variation_note": "중: 동의어 치환·문장별 패러프레이즈, 순서·논리 보존. 퍼즐 단어 5개(gesture/recall/animals/chicken/encoded) 보존.", "level_note": "표준: 저배점(3.3~3.5), 함정 문항당 1종·약하게, 정답 또렷.", "cross_set_prev": ["set1 digitalmin (요지/불일치·답할수있는/1개고르기·동사준동사/반의어/조건영작/영영퍼즐FOCUS)", "set2 iceage (제목/표정리·일치/네모ABC·수일치태관계사/혼동어/요약문빈칸영작)", "set3 workingmem (주제/잘못이해·지칭/1개고르기·형부/반의어/조건영작)"]}};
+const GRID   = {"rows": 8, "cols": 8, "hidden": "TRACE", "cells": [{"r": 0, "c": 0, "ch": "R", "num": 1, "mark": "Ⓑ"}, {"r": 1, "c": 0, "ch": "E", "num": null, "mark": null}, {"r": 1, "c": 2, "ch": "C", "num": 2, "mark": "Ⓓ"}, {"r": 1, "c": 6, "ch": "G", "num": 3, "mark": null}, {"r": 2, "c": 0, "ch": "C", "num": null, "mark": null}, {"r": 2, "c": 2, "ch": "H", "num": null, "mark": null}, {"r": 2, "c": 6, "ch": "E", "num": null, "mark": null}, {"r": 3, "c": 0, "ch": "A", "num": 4, "mark": "Ⓒ"}, {"r": 3, "c": 1, "ch": "N", "num": null, "mark": null}, {"r": 3, "c": 2, "ch": "I", "num": null, "mark": null}, {"r": 3, "c": 3, "ch": "M", "num": null, "mark": null}, {"r": 3, "c": 4, "ch": "A", "num": null, "mark": null}, {"r": 3, "c": 5, "ch": "L", "num": null, "mark": null}, {"r": 3, "c": 6, "ch": "S", "num": null, "mark": null}, {"r": 4, "c": 0, "ch": "L", "num": null, "mark": null}, {"r": 4, "c": 2, "ch": "C", "num": null, "mark": null}, {"r": 4, "c": 6, "ch": "T", "num": null, "mark": "Ⓐ"}, {"r": 5, "c": 0, "ch": "L", "num": null, "mark": null}, {"r": 5, "c": 2, "ch": "K", "num": null, "mark": null}, {"r": 5, "c": 6, "ch": "U", "num": null, "mark": null}, {"r": 6, "c": 2, "ch": "E", "num": null, "mark": null}, {"r": 6, "c": 6, "ch": "R", "num": null, "mark": null}, {"r": 7, "c": 1, "ch": "E", "num": 5, "mark": "Ⓔ"}, {"r": 7, "c": 2, "ch": "N", "num": null, "mark": null}, {"r": 7, "c": 3, "ch": "C", "num": null, "mark": null}, {"r": 7, "c": 4, "ch": "O", "num": null, "mark": null}, {"r": 7, "c": 5, "ch": "D", "num": null, "mark": null}, {"r": 7, "c": 6, "ch": "E", "num": null, "mark": null}, {"r": 7, "c": 7, "ch": "D", "num": null, "mark": null}], "across": [{"num": 4, "word": "ANIMALS", "clue": "living creatures that are not plants or human beings", "len": 7}, {"num": 5, "word": "ENCODED", "clue": "converted into a form in which information can be stored", "len": 7}], "down": [{"num": 1, "word": "RECALL", "clue": "to bring a past experience or fact back into the mind", "len": 6}, {"num": 2, "word": "CHICKEN", "clue": "a common farm bird kept for its eggs and meat", "len": 7}, {"num": 3, "word": "GESTURE", "clue": "a movement of the hands or body used to express an idea or meaning", "len": 7}], "marks": [{"label": "Ⓐ", "letter": "T", "word": "GESTURE"}, {"label": "Ⓑ", "letter": "R", "word": "RECALL"}, {"label": "Ⓒ", "letter": "A", "word": "ANIMALS"}, {"label": "Ⓓ", "letter": "C", "word": "CHICKEN"}, {"label": "Ⓔ", "letter": "E", "word": "ENCODED"}]};
+const responses = {};
+const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const norm = s => (s==null?'':String(s)).toLowerCase().replace(/[.,!?;:'"()]/g,'').replace(/\s+/g,' ').trim();
+
+function renderStim(s){
+  if(!s) return '';
+  let h = esc(s);
+  h = h.replace(/\[\[(\S) (.*?)\]\]/g,(m,mk,w)=>`<span class="mk">${mk}</span><u>${w}</u>`);
+  h = h.replace(/\[([^\[\]]*?\/[^\[\]]*?)\]/g,(m,inner)=>`<span class="boxsel">[${inner}]</span>`);
+  h = h.replace(/_{3,}/g,'<span class="blank"></span>');
+  return h;
+}
+
+document.getElementById('title').textContent = RECORD.passage.title;
+const m = RECORD.meta;
+document.getElementById('meta').innerHTML =
+  `레퍼런스 <b>${m.reference}</b> · 고${m.grade} · variation ${m.variation} · level ${m.level} · ${RECORD.passage_id}`;
+document.getElementById('ptext').textContent = RECORD.passage.text;
+const box = document.getElementById('questions');
+
+function choiceList(q){
+  const ol=document.createElement('ol'); ol.className='choices';
+  q.choices.forEach(c=>{
+    const li=document.createElement('li'); li.textContent=c; li.dataset.sym=c.trim().charAt(0);
+    li.onclick=()=>{ [...ol.children].forEach(x=>x.classList.remove('sel')); li.classList.add('sel');
+      responses[q.id]=li.dataset.sym; };
+    ol.appendChild(li);
+  });
+  return ol;
+}
+
+function crossword(q){
+  const wrap=document.createElement('div');
+  const g=document.createElement('div'); g.className='xw';
+  g.style.gridTemplateColumns=`repeat(${GRID.cols},30px)`;
+  const map={}; GRID.cells.forEach(c=>map[c.r+'_'+c.c]=c);
+  for(let r=0;r<GRID.rows;r++){ for(let c=0;c<GRID.cols;c++){
+    const cell=document.createElement('div'); cell.className='cell'; const d=map[r+'_'+c];
+    if(d){ cell.classList.add('on'); if(d.mark) cell.classList.add('star');
+      if(d.num) cell.innerHTML+=`<span class="n">${d.num}</span>`;
+      cell.innerHTML+=`<span class="ch">${d.ch}</span>`;
+      if(d.mark) cell.innerHTML+=`<span class="st">${d.mark}</span>`;
+    } else cell.classList.add('blk');
+    g.appendChild(cell);
+  }}
+  wrap.appendChild(g);
+  const cl=document.createElement('div'); cl.className='clues';
+  let html='<div><b>ACROSS →</b></div>';
+  GRID.across.forEach(e=>html+=`<div>${e.num}. (${e.len}) ${esc(e.clue)}</div>`);
+  html+='<div style="margin-top:6px"><b>DOWN ↓</b></div>';
+  GRID.down.forEach(e=>html+=`<div>${e.num}. (${e.len}) ${esc(e.clue)}</div>`);
+  cl.innerHTML=html; wrap.appendChild(cl);
+  const ex=document.createElement('div'); ex.className='extract';
+  const last=GRID.marks[GRID.marks.length-1].label;
+  const lab=document.createElement('span'); lab.textContent=`Ⓐ~${last} 칸 철자를 순서대로 모은 단어:`;
+  const inp=document.createElement('input'); inp.className='ans'; inp.placeholder='숨은 단어';
+  inp.oninput=()=>responses[q.id]=inp.value;
+  ex.appendChild(lab); ex.appendChild(inp); wrap.appendChild(ex);
+  return wrap;
+}
+
+RECORD.questions.forEach((q,i)=>{
+  const div=document.createElement('div'); div.className='q'; div.dataset.qi=i;
+  const head=document.createElement('div'); head.className='head';
+  const tags=(q.tags||[]).map(t=>`<span class="badge">${t}</span>`).join(' ');
+  head.innerHTML=`<span class="no">${i+1}.</span><span class="prompt">${esc(q.prompt)} ${tags}</span><span class="pts">[${q.points}점]</span>`;
+  div.appendChild(head);
+  if(q.stimulus){ const st=document.createElement('div'); st.className='stim'; st.innerHTML=renderStim(q.stimulus); div.appendChild(st); }
+
+  if(q.type==='영영풀이퍼즐'){ div.appendChild(crossword(q)); }
+  else if(q.choices){ div.appendChild(choiceList(q)); }
+  else if(q.type==='서술형_조건영작'){
+    if(q.korean_prompt){ const k=document.createElement('div'); k.style.cssText='font-size:.88rem;margin:4px 0'; k.textContent='우리말: '+q.korean_prompt; div.appendChild(k); }
+    if(q.word_bank){ const wb=document.createElement('div'); wb.className='wb'; q.word_bank.forEach(w=>{const s=document.createElement('span');s.textContent=w;wb.appendChild(s);}); div.appendChild(wb); }
+    const ta=document.createElement('textarea'); ta.placeholder='여기에 영작'; ta.oninput=()=>responses[q.id]=ta.value; div.appendChild(ta);
+    const cd=document.createElement('div'); cd.className='cond'; cd.textContent='<조건> 보기를 모두 한 번씩 사용, 어형 변형 없이 배열'; div.appendChild(cd);
+  } else {
+    const ta=document.createElement('textarea'); ta.placeholder='답안 작성'; ta.oninput=()=>responses[q.id]=ta.value; div.appendChild(ta);
+  }
+
+  const res=document.createElement('div'); res.className='result'; div.appendChild(res);
+
+  const t=document.createElement('div'); t.className='teach';
+  let th=`<span class="lab">정답:</span> ${esc(typeof q.answer==='object'?JSON.stringify(q.answer):(q.answer||q.answer_arrangement||''))}`;
+  if(q.answer_arrangement) th+=`<br><span class="lab">배열:</span> ${esc(q.answer_arrangement)}`;
+  if(q.rationale) th+=`<br><span class="lab">해설:</span> ${esc(q.rationale)}`;
+  if(q.self_check) th+=`<br><span class="lab">self_check:</span> 의도 ${q.self_check.intended_count}/검증 ${q.self_check.verified_count} ${q.self_check.trap_types?'· '+q.self_check.trap_types.join(','):''}`;
+  if(q.analysis){ th+='<ul class="ana">'; q.analysis.forEach(a=>{ th+=`<li><span class="${a.verdict==='오류'?'err':'ok'}">${a.marker} ${a.verdict}</span> — ${esc(a.point)}</li>`; }); th+='</ul>'; }
+  if(q.puzzle_note) th+=`<br><span class="lab">숨은 단어:</span> ${esc(GRID.hidden)} (${GRID.marks.map(x=>x.label+'='+x.letter).join(' ')})<br><span class="lab">퍼즐:</span> ${esc(q.puzzle_note)}`;
+  t.innerHTML=th; div.appendChild(t);
+  box.appendChild(div);
+});
+
+// 채점
+function correctSet(q){
+  if(q.type==='영영풀이퍼즐') return (q.accepted_answers&&q.accepted_answers.hidden)||[q.answer];
+  if(q.type==='서술형_조건영작') return q.accepted_answers||[q.answer_arrangement];
+  return [q.answer];
+}
+function grade(){
+  let earned=0,total=0,objTotal=0,objEarned=0,review=[];
+  const cards=document.querySelectorAll('.q');
+  RECORD.questions.forEach((q,i)=>{
+    total+=q.points; const card=cards[i]; const res=card.querySelector('.result');
+    const r=responses[q.id]; let ok=false,status,expected;
+    if(q.choices){
+      objTotal+=q.points; expected=q.answer; ok=(r||'')===q.answer; status=ok?'정답':'오답';
+      const lis=card.querySelectorAll('ol.choices li');
+      lis.forEach(li=>{ if(li.dataset.sym===q.answer) li.classList.add('correct');
+        if(li.classList.contains('sel') && !ok) li.classList.add('wrong'); });
+      if(ok) objEarned+=q.points;
+    } else if(q.type==='영영풀이퍼즐'){
+      const acc=correctSet(q); objTotal+=q.points; expected=acc.join(' / ');
+      ok=acc.some(a=>norm(a)===norm(r)); status=ok?'정답':'오답'; if(ok) objEarned+=q.points;
+    } else if(q.type==='서술형_조건영작'){
+      const acc=correctSet(q); expected=acc.join(' / ');
+      ok=acc.some(a=>norm(a)===norm(r)); status=ok?'정답(자동일치)':'검수 필요'; if(!ok) review.push(i+1);
+    } else { status='검수 필요'; expected=q.answer||''; review.push(i+1); }
+    if(ok) earned+=q.points;
+    res.style.display='block';
+    res.className='result '+(ok?'ok':(status==='검수 필요'?'rev':'no'));
+    res.innerHTML=`<b>${ok?'✓ '+status:(status==='검수 필요'?'⚠ '+status:'✗ '+status)}</b> · 정답: ${esc(expected)}`
+      +(q.rationale?`<br>해설: ${esc(q.rationale)}`:'');
+  });
+  const s=document.getElementById('score'); s.style.display='inline';
+  s.innerHTML=`자동채점 <b>${objEarned.toFixed(1)} / ${objTotal.toFixed(1)}점</b>`
+    +(review.length?` · 서술형 검수 필요: ${review.join(', ')}번`:'')
+    +` · (전체 ${total.toFixed(1)}점)`;
+}
+function reset(){
+  for(const k in responses) delete responses[k];
+  document.querySelectorAll('ol.choices li').forEach(li=>li.classList.remove('sel','correct','wrong'));
+  document.querySelectorAll('textarea, input.ans').forEach(e=>e.value='');
+  document.querySelectorAll('.result').forEach(r=>{r.style.display='none';r.innerHTML='';});
+  document.getElementById('score').style.display='none';
+}
+document.getElementById('gbtn').onclick=grade;
+document.getElementById('rbtn').onclick=reset;
+const btn=document.getElementById('tbtn');
+btn.onclick=()=>{ document.body.classList.toggle('showteach'); btn.classList.toggle('on');
+  btn.textContent=document.body.classList.contains('showteach')?'학생 보기로':'정답·해설 보기'; };
+</script>
+</body>
+</html>
